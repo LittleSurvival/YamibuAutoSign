@@ -16,8 +16,8 @@ class LoginModal(discord.ui.Modal, title="Yamibo Login"):
         style=discord.TextStyle.short
     )
     safety_question = discord.ui.TextInput(
-        label="Safety Question ID (0-7)",
-        placeholder="0 means no security question",
+        label="安全提问",
+        placeholder="(未设置请輸入0)",
         required=True
     )
     safety_answer = discord.ui.TextInput(
@@ -37,7 +37,7 @@ class LoginModal(discord.ui.Modal, title="Yamibo Login"):
         login_instance = YamiboLogin(
             username=self.username.value,
             password=self.password.value,
-            safety_question=self.safety_question.value,
+            safety_question=self.safety_question,
             safety_answer=self.safety_answer.value
         )
         account = await login_instance.login()
@@ -67,10 +67,12 @@ class LoginCog(commands.Cog):
         self.bot = bot
 
     @discord.app_commands.command(name="login", description="Login to Yamibo")
+    @discord.app_commands.guilds(discord.Object(id=1356206853855383652))
     async def login(self, interaction: discord.Interaction):
-        """Trigger the Yamibo login modal."""
         modal = LoginModal()
         await interaction.response.send_modal(modal)
 
-def setup(bot: commands.Bot):
-    bot.add_cog(LoginCog(bot))
+
+async def setup(bot: commands.Bot):
+    print(f"Command {__name__} Loaded!")
+    await bot.add_cog(LoginCog(bot))
