@@ -3,7 +3,9 @@ from model.LoginModel import YamiboLogin
 from model.DataModel import DataModel
 from discord.ext import commands
 
-class LoginModal(discord.ui.Modal, title="Yamibo Login"):
+import var
+
+class CommandLoginModal(discord.ui.Modal, title="Yamibo Login"):
     username = discord.ui.TextInput(
         label="Username",
         placeholder="Enter your Yamibo username",
@@ -35,24 +37,21 @@ class LoginModal(discord.ui.Modal, title="Yamibo Login"):
         await interaction.response.send_message(embed=loading_embed, ephemeral=True)
         
         login_instance = YamiboLogin(
+            discordUserId=interaction.user.id,
+            discordGuildId=interaction.guild.id,
             username=self.username.value,
             password=self.password.value,
             safety_question=self.safety_question,
             safety_answer=self.safety_answer.value
         )
         account = await login_instance.login()
-        
-        db = DataModel()
-        db.save_account(account)
 
         if account.get("good"):
             result_embed = discord.Embed(
                 title="Login Successful",
-                description=f"Welcome {account['name']}!\nTimestamp: {account['timestamp']}",
+                description=f"Welcome {account['message']}!\nTimestamp: {account['timestamp']}",
                 color=discord.Color.green()
             )
-            cookies_str = "\n".join(f"{k}: {v}" for k, v in account["cookies"].items()) or "No cookies found."
-            result_embed.add_field(name="Cookies", value=cookies_str, inline=False)
         else:
             error_msg = account.get("error", "Login failed.")
             result_embed = discord.Embed(
@@ -60,19 +59,18 @@ class LoginModal(discord.ui.Modal, title="Yamibo Login"):
                 description=error_msg,
                 color=discord.Color.red()
             )
-        await interaction.followup.send(embed=result_embed, ephemeral=True)
+        await interaction.edit_original_response(embed=result_embed)
 
 class LoginCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @discord.app_commands.command(name="login", description="Login to Yamibo")
-    @discord.app_commands.guilds(discord.Object(id=1356206853855383652))
+    @discord.app_commands.guilds(discord.Object(id=var.GUILD_ID))
     async def login(self, interaction: discord.Interaction):
-        modal = LoginModal()
+        modal = CommandLoginModal()
         await interaction.response.send_modal(modal)
 
 
 async def setup(bot: commands.Bot):
-    print(f"Command {__name__} Loaded!")
     await bot.add_cog(LoginCog(bot))

@@ -1,3 +1,4 @@
 aiohttp
 typing
 discord
+aiosqlite
