@@ -1,6 +1,3 @@
-setup/config.yaml
 *.yaml
 /database
 *.pyc
-*.pyc
-*.yaml
