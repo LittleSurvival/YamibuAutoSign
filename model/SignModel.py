@@ -30,6 +30,7 @@ class SignModel:
 
                 match = re.search(r'<a\s+href="([^"]+)"\s+class="btna">', text)
                 if not match:
+                    print(text)
                     return {"success": False, "info": "Sign button not found. Possibly already signed or page structure changed."}
 
                 sign_href = match.group(1)

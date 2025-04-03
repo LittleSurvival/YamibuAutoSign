@@ -77,7 +77,7 @@ class YamiboLogin:
                     if self.safety_answer:
                         text_response = text_response.replace(self.safety_answer, '*' * len(self.safety_answer))
                     text_response = text_response.replace(self.password, '*' * len(self.password))
-                    account["error"] = f"Login failed: {text_response}"
+                    account["message"] = f"Login failed: {text_response}"
                     
                     return account
                 else:

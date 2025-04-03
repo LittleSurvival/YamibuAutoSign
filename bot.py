@@ -8,14 +8,16 @@ bot = commands.Bot(command_prefix="!", intents=intents)
 db = DataModel()
 
 async def load_extensions():
-    for filename in os.listdir("./command"):
-        if filename.endswith(".py") and not '__init__' in filename:
-            await bot.load_extension(f"command.{filename[:-3]}")
-            print(f"Extension loaded: {filename}")
+    for root, dirs, files in os.walk("./command"):
+        for filename in files:
+            if filename.endswith(".py") and not '__init__' in filename:
+                module_path = os.path.join(root, filename)[2:-3].replace(os.path.sep, ".")
+                await bot.load_extension(module_path)
+                print(f"Extension loaded: {module_path}")
 
 @bot.event
 async def on_ready():
-    await bot.tree.sync(guild=discord.Object(id=1356206853855383652))
+    await bot.tree.sync()
     print(f"Logged in as {bot.user}")
     
 @bot.event

@@ -3,18 +3,16 @@ from discord.ext import commands
 import bot
 from model.SignModel import SignModel
 from model.DataModel import DataModel
-import var
 
 class SignCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
     @discord.app_commands.command(name="sign", description="Perform daily sign-in")
-    @discord.app_commands.guilds(discord.Object(id=var.GUILD_ID))
     async def sign(self, interaction: discord.Interaction):
         loading_embed = discord.Embed(
-            title="Logging In",
-            description="Please wait while we log you in...",
+            title="Sign In",
+            description="Please wait while we sign in...",
             color=discord.Color.blue()
         )
         await interaction.response.send_message(embed=loading_embed, ephemeral=True)

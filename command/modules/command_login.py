@@ -49,11 +49,11 @@ class CommandLoginModal(discord.ui.Modal, title="Yamibo Login"):
         if account.get("good"):
             result_embed = discord.Embed(
                 title="Login Successful",
-                description=f"Welcome {account['message']}!\nTimestamp: {account['timestamp']}",
+                description=f"{account['message']}!\nTimestamp: {account['timestamp']}",
                 color=discord.Color.green()
             )
         else:
-            error_msg = account.get("error", "Login failed.")
+            error_msg = account.get("message", "Login failed.")
             result_embed = discord.Embed(
                 title="Login Failed",
                 description=error_msg,
@@ -66,7 +66,6 @@ class LoginCog(commands.Cog):
         self.bot = bot
 
     @discord.app_commands.command(name="login", description="Login to Yamibo")
-    @discord.app_commands.guilds(discord.Object(id=var.GUILD_ID))
     async def login(self, interaction: discord.Interaction):
         modal = CommandLoginModal()
         await interaction.response.send_modal(modal)
