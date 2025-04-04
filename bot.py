@@ -1,7 +1,11 @@
 import discord
-from discord.ext import commands
 import os
+import var
+import asyncio
+
+from discord.ext import commands
 from model.DataModel import DataModel
+from service import service_autosign
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
@@ -20,22 +24,23 @@ async def on_ready():
     await bot.tree.sync()
     print(f"Logged in as {bot.user}")
     
+    """
+    Auto Sign Service
+    """
+    autosign = service_autosign.DailySignService(bot=bot)
+    asyncio.create_task(autosign.start_service())
+    
 @bot.event
 async def on_message(message):
     if bot.user.mentioned_in(message):
         await message.reply(f"Hello {message.author.mention}!")
     await bot.process_commands(message)
 
-
-async def main():
+async def launch():
     await db.create_table()
     async with bot:
         await load_extensions()
-        with open("setup/config.yaml", "r") as file:
-            import yaml
-            config = yaml.safe_load(file)
-            await bot.start(config['bot_token'])
+        await bot.start(var.BOT_TOKEN)
 
 if __name__ == "__main__":
-    import asyncio
-    asyncio.run(main())
+    asyncio.run(launch())
