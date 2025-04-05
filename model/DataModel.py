@@ -6,7 +6,7 @@ class Account:
     """
     Data structure representing a Yamibo account with associated Discord information.
     """
-    def __init__(self, discord_user_id, discord_guild_id, username="", cookies={ }, timestamp=0, good=False):
+    def __init__(self, discord_user_id, discord_guild_id, username="", cookies={ }, timestamp=0, good=False, autosign=False):
         """
         Initialize an Account object.
         
@@ -23,6 +23,7 @@ class Account:
         self.cookies = cookies or {}
         self.timestamp = timestamp
         self.good = good
+        self.autosign = autosign
     
     @classmethod
     def from_dict(cls, data):
@@ -38,7 +39,8 @@ class Account:
             username=data.get("name", ""),
             cookies=data.get("cookies", {}),
             timestamp=data.get("timestamp", 0),
-            good=data.get("good", False)
+            good=data.get("good", False),
+            good=data.get("autosign", False),
         )
     
     def to_dict(self):
@@ -53,7 +55,8 @@ class Account:
             "name": self.username,
             "cookies": self.cookies,
             "timestamp": self.timestamp,
-            "good": self.good
+            "good": self.good,
+            "autosign": self.autosign
         }
 
 class DataBase:
@@ -74,7 +77,8 @@ class DataBase:
                     username TEXT NOT NULL UNIQUE,
                     cookies TEXT,
                     timestamp INTEGER,
-                    good INTEGER
+                    good INTEGER,
+                    autosign INTEGER
                 )
             """)
             await db.commit()
@@ -116,7 +120,8 @@ class DataBase:
                         "name": row[3],
                         "cookies": json.loads(row[4]),
                         "timestamp": row[5],
-                        "good": bool(row[6])
+                        "good": bool(row[6]),
+                        "autosign": bool(row[7])
                     }
                     return Account.from_dict(account_data)
                 return None
@@ -132,12 +137,13 @@ class DataBase:
                         "name": row[3],
                         "cookies": json.loads(row[4]),
                         "timestamp": row[5],
-                        "good": bool(row[6])
+                        "good": bool(row[6]),
+                        "autosign": bool(row[7])
                     }
                     return Account.from_dict(account_data)
                 return None
 
-    async def get_all_accounts(self) -> list:
+    async def get_all_accounts(self) -> list[Account]:
         """
         Retrieves all account records asynchronously.
         Returns:
@@ -153,7 +159,30 @@ class DataBase:
                         "name": row[3],
                         "cookies": json.loads(row[4]),
                         "timestamp": row[5],
-                        "good": bool(row[6])
+                        "good": bool(row[6]),
+                        "autosign": bool(row[7])
+                    }
+                    accounts.append(Account.from_dict(account_data)) 
+        return accounts
+    
+    async def get_autosign_accounts(self) -> list[Account]:
+        """
+        Retrieves all account records where autosign is true.
+        Returns:
+            A list of Account objects with autosign enabled.
+        """
+        accounts: list[Account] = []
+        async with aiosqlite.connect(self.accounts_db) as db:
+            async with db.execute("SELECT * FROM accounts WHERE autosign = 1") as cursor:
+                async for row in cursor:
+                    account_data = {
+                        "discordUserId": row[1],
+                        "discordGuildId": row[2],
+                        "name": row[3],
+                        "cookies": json.loads(row[4]),
+                        "timestamp": row[5],
+                        "good": bool(row[6]),
+                        "autosign": bool(row[7])
                     }
                     accounts.append(Account.from_dict(account_data)) 
         return accounts

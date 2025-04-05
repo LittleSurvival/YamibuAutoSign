@@ -1,10 +1,8 @@
 import asyncio
-import yaml
 from datetime import datetime, timedelta
 import discord
 import bot
 from model.SignModel import SignModel
-from model.DataModel import DataBase
 import var
 
 class DailySignService:
@@ -31,7 +29,6 @@ class DailySignService:
             delay = (next_run - now).total_seconds()
             print(f"[Service] Current time: {now}. Next run at: {next_run}. Total delay: {delay:.0f} seconds.")
 
-           
             while delay > 0:
                 if delay > 300:
                     chosen_interval = delay - 300
@@ -69,7 +66,7 @@ class DailySignService:
         loading_embed.set_footer(text="Please wait...")
         loading_message = await channel.send(embed=loading_embed)
         
-        accounts = await bot.db.get_all_accounts()
+        accounts = await bot.db.get_autosign_accounts()
         
         total = len(accounts)
         success_count = 0
@@ -88,14 +85,14 @@ class DailySignService:
         await loading_message.edit(embed=progress_embed)
 
         for idx, account in enumerate(accounts, start=1):
-            sign_instance = SignModel(account["name"], account["cookies"])
+            sign_instance = SignModel(account.username, account.cookies)
             result = await sign_instance.sign()
             if result.get("success"):
                 success_count += 1
-                details.append(f"{account['name']}: Success - {result.get('info')}")
+                details.append(f"{account.username}: Success - {result.get('info')}")
             else:
                 failed_count += 1
-                details.append(f"{account['name']}: Failed - {result.get('info')}")
+                details.append(f"{account.username}: Failed - {result.get('info')}")
                 
             await asyncio.sleep(self.check_delay)
 

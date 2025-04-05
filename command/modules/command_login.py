@@ -104,6 +104,40 @@ class CommandLoginbyCookieModal(discord.ui.Modal, title="Yamibo Login - Cookie M
             )
         await interaction.edit_original_response(embed=result_embed)
 
+import discord
+
+class CookieLoginEmbed:
+    @staticmethod
+    def get_embed() -> discord.Embed:
+        embed = discord.Embed(
+            title="如何使用 Cookie 登入百合会",
+            description=(
+                "以下步骤将指导您如何获取并填写 Cookie。\n"
+                "请注意：此方法仅适用于电脑端浏览器。"
+            ),
+            color=discord.Color.blue()
+        )
+        embed.set_image(url="https://example.com")
+        
+        steps = (
+            "**1. 打开 [百合会](https://bbs.yamibo.com/) 并完成登录。**\n"
+            "   - 确保您已经成功登录到自己的账号。\n\n"
+            "**2. 打开开发者工具：**\n"
+            "   - 按下 **F12** 或同时按下 **Ctrl + Shift + I**。\n\n"
+            "**3. 进入 Application 面板：**\n"
+            "   - 在打开的开发者工具中，找到并点击 **Application**（或中文“应用”）\n"
+            "   - 左侧找到 **Cookies** 并点击。\n\n"
+            "**4. 查找 Cookie：**\n"
+            "   - 在 Cookies 列表中，找到 **EeqY_2132_auth** 和 **EeqY_2132_saltkey**。\n\n"
+            "**5. 复制并填写：**\n"
+            "   - 将 `EeqY_2132_auth` 的值复制后，填入我们程序中的 **auth** 字段。\n"
+            "   - 将 `EeqY_2132_saltkey` 的值复制后，填入 **saltkey** 字段。\n\n"
+            "完成以上步骤后，程序即可使用您的 Cookie 信息进行自动登录。"
+        )
+        embed.add_field(name="步骤说明", value=steps, inline=False)
+        embed.set_footer(text="确保按顺序操作即可。祝使用愉快！")
+        return embed
+
 class LoginCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -112,10 +146,14 @@ class LoginCog(commands.Cog):
     @discord.app_commands.describe(mode="Select login mode: Password or Cookie")
     @discord.app_commands.choices(mode=[
         discord.app_commands.Choice(name="Password", value="password"),
-        discord.app_commands.Choice(name="Cookie", value="cookie")
+        discord.app_commands.Choice(name="Cookie", value="cookie"),
+        discord.app_commands.Choice(name="How to Login with cookie?", value="help"),
     ])
     async def login(self, interaction: discord.Interaction, mode: str):
-        if mode == "password":
+        if mode == "help":
+            await interaction.response.send_message(embed=CookieLoginEmbed.get_embed(), ephemeral=True)
+            return
+        elif mode == "password":
             modal = CommandLoginbyPasswordModal()
         elif mode == "cookie":
             modal = CommandLoginbyCookieModal()
