@@ -26,3 +26,8 @@ if %errorlevel% neq 0 (
 echo Installing required packages...
 pip3 install -r requirements.txt
 echo Setup completed successfully.
+
+echo.
+echo Setup completed. Press any key to exit...
+
+pause >nul
