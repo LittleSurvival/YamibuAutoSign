@@ -71,7 +71,7 @@ class DataBase:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     discordUserId INTEGER,
                     discordGuildId INTEGER,
-                    username TEXT NOT NULL,
+                    username TEXT NOT NULL UNIQUE,
                     cookies TEXT,
                     timestamp INTEGER,
                     good INTEGER
@@ -82,8 +82,8 @@ class DataBase:
             await db.execute("""
                 CREATE TABLE IF NOT EXISTS notifychannels (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    discordGuildId INTEGER,
-                    discordChannelId INTEGER
+                    discordGuildId INTEGER NOT NULL UNIQUE,
+                    discordChannelId INTEGER NOT NULL UNIQUE
                 )
             """)
             await db.commit()

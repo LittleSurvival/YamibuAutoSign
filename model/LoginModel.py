@@ -46,12 +46,13 @@ class YamiboLogin_Cookie:
                     
                     return message, account
                 else:
+                    formated_message, username = parse_success_xml_to_text(check_page_html)
+
                     account.good = True
-                    message = parse_success_xml_to_text(check_page_html)
-                    print(message)
+                    account.username = username
                     
                     await bot.db.save_account(account)
-                    return message, account
+                    return formated_message, account
         except TimeoutError:
             message = "Login failed: Timeout."
         
@@ -136,24 +137,24 @@ class YamiboLogin_Password:
                     return message, account
                 else:
                     account.good = True
-                    message = parse_success_xml_to_text(text_response)
+                    formated_message, username = parse_success_xml_to_text(text_response)
                     
                     await bot.db.save_account(account)
-                    return message, account
+                    return formated_message, account
                     
         except asyncio.TimeoutError:
             message = "Login failed: Timeout."
 
         return message, account
     
-def parse_success_xml_to_text(text_response: str) -> str:
+def parse_success_xml_to_text(text_response: str) -> tuple[str, str]:
         """
         Parse the login success message from the response text.
         This function handles two possible formats:
         1. JavaScript format: $('succeedlocation').innerHTML = '...';
         2. HTML format: <div id="messagetext" class="alert_right"><p>欢迎您回来，...</p>
         
-        Returns a formatted success message.
+        Returns a formatted [success message, username].
         """
         js_pattern = r"\$\('succeedlocation'\)\.innerHTML\s*=\s*'([^<]+)<font[^>]+>([^<]+)</font>\s*([^，']+)"
         js_match = re.search(js_pattern, text_response)
@@ -163,7 +164,7 @@ def parse_success_xml_to_text(text_response: str) -> str:
             part2 = js_match.group(2)  # Expected: "百合花蕾"
             part3 = js_match.group(3)  # Expected: "thenano"
             result = part1.strip() + " " + part2.strip() + " " + part3.strip()
-            return result  # Output: 欢迎您回来， 百合花蕾 thenano
+            return result, part3.strip()  # Output: 欢迎您回来， 百合花蕾 thenano
         
         html_pattern = r'<div id="messagetext" class="alert_right">\s*<p>([^<]+)<font[^>]+>([^<]+)</font>\s*([^<,]+)'
         html_match = re.search(html_pattern, text_response)
@@ -173,6 +174,6 @@ def parse_success_xml_to_text(text_response: str) -> str:
             part2 = html_match.group(2)  # Expected: "百合花蕾"
             part3 = html_match.group(3).split("，")[0]  # Expected: "thenano"
             result = part1.strip() + " " + part2.strip() + " " + part3.strip()
-            return result  # Output: 欢迎您回来， 百合花蕾 thenano
+            return result, part3.strip()  # Output: 欢迎您回来， 百合花蕾 thenano
             
         return text_response
