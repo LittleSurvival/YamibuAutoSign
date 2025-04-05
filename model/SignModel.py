@@ -47,6 +47,7 @@ class SignModel:
                 message_match = re.search(r'<div\s+id="messagetext"[^>]*>.*?<p>(.*?)</p>', sign_text, re.DOTALL)
                 if message_match:
                     message = message_match.group(1).strip()
+                    message = re.sub(r'<[^>]*>', '', message, flags=re.DOTALL).strip()
                     self.status = True
                     return {"success": True, "info": message}
                 else:
