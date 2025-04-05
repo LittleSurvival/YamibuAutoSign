@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands
 import bot
 from model.SignModel import SignModel
-from model.DataModel import DataModel
+from model.DataModel import Account, DataBase
 
 class SignCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -26,7 +26,7 @@ class SignCog(commands.Cog):
             )
             await interaction.response.send_message(embed=embed, ephemeral=True)
             return
-        sign_instance = SignModel(name=account["name"], cookies=account["cookies"])
+        sign_instance = SignModel(name=account.username, cookies=account.cookies)
        
         result = await sign_instance.sign()  # {"success": bool, "info": str}
         

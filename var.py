@@ -11,6 +11,7 @@ GUILD_ID = "1356206853855383652"
 
 LOGIN_URL = "https://bbs.yamibo.com/member.php?mod=logging&action=login"
 LOGIN_POST_URL = "https://bbs.yamibo.com/member.php?mod=logging&action=login&loginsubmit=yes&inajax=1"
+LOGIN_CHECK_URL = "https://bbs.yamibo.com/forum-49-1.html" #文學區首頁
 
 SIGN_URL = "https://bbs.yamibo.com/plugin.php?id=zqlj_sign"
 

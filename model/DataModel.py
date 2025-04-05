@@ -2,7 +2,61 @@ import os
 import json
 import aiosqlite
 
-class DataModel:
+class Account:
+    """
+    Data structure representing a Yamibo account with associated Discord information.
+    """
+    def __init__(self, discord_user_id, discord_guild_id, username="", cookies={ }, timestamp=0, good=False):
+        """
+        Initialize an Account object.
+        
+        :param discord_user_id: The Discord user ID associated with this account
+        :param discord_guild_id: The Discord guild ID associated with this account
+        :param username: The Yamibo username
+        :param cookies: Dictionary of cookies used for authentication
+        :param timestamp: Unix timestamp of when the account was created/updated
+        :param good: Boolean indicating if the account is valid
+        """
+        self.discord_user_id = discord_user_id
+        self.discord_guild_id = discord_guild_id
+        self.username = username
+        self.cookies = cookies or {}
+        self.timestamp = timestamp
+        self.good = good
+    
+    @classmethod
+    def from_dict(cls, data):
+        """
+        Create an Account object from a dictionary.
+        
+        :param data: Dictionary containing account data
+        :return: Account object
+        """
+        return cls(
+            discord_user_id=data.get("discordUserId"),
+            discord_guild_id=data.get("discordGuildId"),
+            username=data.get("name", ""),
+            cookies=data.get("cookies", {}),
+            timestamp=data.get("timestamp", 0),
+            good=data.get("good", False)
+        )
+    
+    def to_dict(self):
+        """
+        Convert the Account object to a dictionary.
+        
+        :return: Dictionary representation of the account
+        """
+        return {
+            "discordUserId": self.discord_user_id,
+            "discordGuildId": self.discord_guild_id,
+            "name": self.username,
+            "cookies": self.cookies,
+            "timestamp": self.timestamp,
+            "good": self.good
+        }
+
+class DataBase:
     def __init__(self):
         db_folder = os.path.dirname(os.path.abspath(__file__))
         database_folder = os.path.join(db_folder, "..", "database")
@@ -34,29 +88,29 @@ class DataModel:
             """)
             await db.commit()
 
-    async def save_account(self, account: dict):
-        cookies_json = json.dumps(account.get("cookies", {}))
-        good_int = 1 if account.get("good") else 0
+    async def save_account(self, account: Account):
+        cookies_json = json.dumps(account.cookies)
+        good_int = 1 if account.good else 0
         async with aiosqlite.connect(self.accounts_db) as db:
             await db.execute("""
                 INSERT OR REPLACE INTO accounts (discordUserId, discordGuildId, username, cookies, timestamp, good)
                 VALUES (?, ?, ?, ?, ?, ?)
             """, (
-                account["discordUserId"],
-                account["discordGuildId"],
-                account["name"],
+                account.discord_user_id,
+                account.discord_guild_id,
+                account.username,
                 cookies_json,
-                account["timestamp"],
+                account.timestamp,
                 good_int
             ))
             await db.commit()
 
-    async def read_account_by_username(self, username: str) -> dict:
+    async def read_account_by_username(self, username: str) -> Account:
         async with aiosqlite.connect(self.accounts_db) as db:
             async with db.execute("SELECT * FROM accounts WHERE username = ?", (username,)) as cursor:
                 row = await cursor.fetchone()
                 if row:
-                    return {
+                    account_data = {
                         "discordUserId": row[1],
                         "discordGuildId": row[2],
                         "name": row[3],
@@ -64,14 +118,15 @@ class DataModel:
                         "timestamp": row[5],
                         "good": bool(row[6])
                     }
-                return {}
+                    return Account.from_dict(account_data)
+                return None
 
-    async def read_account_by_id(self, discordUserId: int) -> dict:
+    async def read_account_by_id(self, discordUserId: int) -> Account | None:
         async with aiosqlite.connect(self.accounts_db) as db:
             async with db.execute("SELECT * FROM accounts WHERE discordUserId = ?", (discordUserId,)) as cursor:
                 row = await cursor.fetchone()
                 if row:
-                    return {
+                    account_data = {
                         "discordUserId": row[1],
                         "discordGuildId": row[2],
                         "name": row[3],
@@ -79,7 +134,8 @@ class DataModel:
                         "timestamp": row[5],
                         "good": bool(row[6])
                     }
-                return {}
+                    return Account.from_dict(account_data)
+                return None
 
     async def get_all_accounts(self) -> list:
         """
@@ -87,18 +143,19 @@ class DataModel:
         Returns:
             A list of dictionaries, each representing an account.
         """
-        accounts = []
+        accounts: list[Account] = []
         async with aiosqlite.connect(self.accounts_db) as db:
             async with db.execute("SELECT * FROM accounts") as cursor:
                 async for row in cursor:
-                    accounts.append({
+                    account_data = {
                         "discordUserId": row[1],
                         "discordGuildId": row[2],
                         "name": row[3],
                         "cookies": json.loads(row[4]),
                         "timestamp": row[5],
                         "good": bool(row[6])
-                    })
+                    }
+                    accounts.append(Account.from_dict(account_data)) 
         return accounts
     
     async def save_notify_channels(self, channel: dict):

@@ -4,12 +4,12 @@ import var
 import asyncio
 
 from discord.ext import commands
-from model.DataModel import DataModel
+from model.DataModel import DataBase
 from service import service_autosign
 
 intents = discord.Intents.default()
 bot = commands.Bot(command_prefix="!", intents=intents)
-db = DataModel()
+db = DataBase()
 
 async def load_extensions():
     for root, dirs, files in os.walk("./command"):

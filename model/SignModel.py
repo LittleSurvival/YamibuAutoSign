@@ -25,7 +25,7 @@ class SignModel:
         """
         try:
             async with aiohttp.ClientSession(cookies=self.cookie) as session:
-                async with session.get(var.SIGN_URL) as resp:
+                async with session.get(var.SIGN_URL, timeout=15) as resp:
                     text = await resp.text()
 
                 match = re.search(r'<a\s+href="([^"]+)"\s+class="btna">', text)

@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import discord
 import bot
 from model.SignModel import SignModel
-from model.DataModel import DataModel
+from model.DataModel import DataBase
 import var
 
 class DailySignService:
