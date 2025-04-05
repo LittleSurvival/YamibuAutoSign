@@ -23,8 +23,8 @@ if %errorlevel% neq 0 (
     echo pip is already installed.
 )
 
-echo Installing required packages...
-pip3 install -r requirements.txt
+echo Installing and updating required packages...
+pip3 install -r requirements.txt --upgrade
 echo Setup completed successfully.
 
 echo.
