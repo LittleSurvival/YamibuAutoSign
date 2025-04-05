@@ -117,7 +117,7 @@ class CookieLoginEmbed:
             ),
             color=discord.Color.blue()
         )
-        embed.set_image(url="https://example.com")
+        embed.set_image(url="https://github.com/LittleSurvival/YamibuAutoSign/blob/main/docs/cookie_location.png?raw=true")
         
         steps = (
             "**1. 打开 [百合会](https://bbs.yamibo.com/) 并完成登录。**\n"

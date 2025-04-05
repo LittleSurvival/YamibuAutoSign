@@ -32,7 +32,8 @@ class YamiboLogin_Cookie:
                 "EeqY_2132_saltkey": self.saltkey
             },
             timestamp=int(time.time()),
-            good=False
+            good=False,
+            autosign=False
         )
         message = "Login failed: Unknown Reason"
         
@@ -96,7 +97,8 @@ class YamiboLogin_Password:
             username=self.username,
             cookies={},
             timestamp=int(time.time()),
-            good=False
+            good=False,
+            autosign=False
         )
         message = "Login failed: Unknown Reason"
 

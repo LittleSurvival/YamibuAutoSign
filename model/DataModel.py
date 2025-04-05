@@ -40,7 +40,7 @@ class Account:
             cookies=data.get("cookies", {}),
             timestamp=data.get("timestamp", 0),
             good=data.get("good", False),
-            good=data.get("autosign", False),
+            autosign=data.get("autosign", False),
         )
     
     def to_dict(self):
@@ -95,17 +95,19 @@ class DataBase:
     async def save_account(self, account: Account):
         cookies_json = json.dumps(account.cookies)
         good_int = 1 if account.good else 0
+        autosign_int = 1 if account.autosign else 0
         async with aiosqlite.connect(self.accounts_db) as db:
             await db.execute("""
-                INSERT OR REPLACE INTO accounts (discordUserId, discordGuildId, username, cookies, timestamp, good)
-                VALUES (?, ?, ?, ?, ?, ?)
+                INSERT OR REPLACE INTO accounts (discordUserId, discordGuildId, username, cookies, timestamp, good, autosign)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
             """, (
                 account.discord_user_id,
                 account.discord_guild_id,
                 account.username,
                 cookies_json,
                 account.timestamp,
-                good_int
+                good_int,
+                autosign_int
             ))
             await db.commit()
 

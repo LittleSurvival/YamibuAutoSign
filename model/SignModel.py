@@ -46,7 +46,7 @@ class SignModel:
                 # This regex captures the text inside the first <p> within the <div id="messagetext" ...>
                 message_match = re.search(r'<div\s+id="messagetext"[^>]*>.*?<p>(.*?)</p>', sign_text, re.DOTALL)
                 if message_match:
-                    message = message_match.group(1).split("!")[0].strip()
+                    message = message_match.group(1).strip()
                     self.status = True
                     return {"success": True, "info": message}
                 else:

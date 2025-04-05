@@ -8,7 +8,7 @@ class SignCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @discord.app_commands.command(name="sign", description="Perform daily sign-in")
+    @discord.app_commands.command(name="sign", description="Perform sign")
     async def sign(self, interaction: discord.Interaction):
         loading_embed = discord.Embed(
             title="Sign In",
