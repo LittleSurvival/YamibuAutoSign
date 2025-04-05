@@ -11,12 +11,12 @@ class HelpEmbed:
         )
         embed.add_field(
             name="/login",
-            value="使用 Cookie|账号密码 登录百合会，自动获取您的账号信息。",
+            value="使用 Cookie 或账号密码登录百合会，启用自动签到等功能。",
             inline=False
         )
         embed.add_field(
             name="/sign",
-            value="使用指令打卡。",
+            value="使用指令打卡，登录后使用该指令即可启用。",
             inline=False
         )
         embed.add_field(
