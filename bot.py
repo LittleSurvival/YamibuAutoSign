@@ -31,7 +31,7 @@ async def on_ready():
     asyncio.create_task(autosign.start_service())
     
 @bot.event
-async def on_message(message):
+async def on_message(message: discord.Message):
     if bot.user.mentioned_in(message):
         await message.reply(f"Hello {message.author.mention}!")
     await bot.process_commands(message)
