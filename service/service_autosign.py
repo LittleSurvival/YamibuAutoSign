@@ -38,10 +38,10 @@ class DailySignService:
                     chosen_interval = 5
                 else:
                     chosen_interval = 1
-                sleep_interval = min(chosen_interval, delay)
+                sleep_interval = min(chosen_interval, max(delay, 1))
                 await asyncio.sleep(sleep_interval)
                 now = datetime.now()
-                delay = max((next_run - now).total_seconds(), 1)
+                delay = (next_run - now).total_seconds()
                 print(f"[Service] Checking... Remaining delay: {delay:.2f} seconds.")
 
             await self.run_sign_process()
