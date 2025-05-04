@@ -30,15 +30,8 @@ class DailySignService:
             print(f"[Service] Current time: {now}. Next run at: {next_run}. Total delay: {delay:.0f} seconds.")
 
             while delay > 0:
-                if delay > 300:
-                    chosen_interval = delay - 300
-                elif delay > 60:
-                    chosen_interval = 60
-                elif delay > 5:
-                    chosen_interval = 5
-                else:
-                    chosen_interval = 1
-                sleep_interval = min(chosen_interval, max(delay, 1))
+                # Check every minute (60 seconds)
+                sleep_interval = min(60, delay)
                 await asyncio.sleep(sleep_interval)
                 now = datetime.now()
                 delay = (next_run - now).total_seconds()
