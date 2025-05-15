@@ -77,15 +77,27 @@ class DailySignService:
         progress_embed.set_footer(text="Progress: 0%")
         await loading_message.edit(embed=progress_embed)
 
+        max_retries = 3
+        retry_delay = 5
+
         for idx, account in enumerate(accounts, start=1):
             sign_instance = SignModel(account.username, account.cookies)
-            result = await sign_instance.sign()
+            
+            result = {"success": False, "info": "Initial attempt failed"}
+            for attempt in range(max_retries):
+                result = await sign_instance.sign()
+                if result.get("success"):
+                    break
+                elif attempt < max_retries - 1:
+                    print(f"[Service] Sign failed for {account.username}, retrying in {retry_delay} seconds...")
+                    await asyncio.sleep(retry_delay)
+
             if result.get("success"):
                 success_count += 1
-                details.append(f"{account.username}: Success - {result.get('info')}")
+                details.append(f"{account.username}: Success - {result.get('info', 'Sign-in succeeded.')}")
             else:
                 failed_count += 1
-                details.append(f"{account.username}: Failed - {result.get('info')}")
+                details.append(f"{account.username}: Failed after {max_retries} attempts - {result.get('info', 'Sign-in failed.')}")
                 
             await asyncio.sleep(self.check_delay)
 
