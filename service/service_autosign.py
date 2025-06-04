@@ -15,29 +15,44 @@ class DailySignService:
     async def start_service(self):
         """
         Main loop:
-         1. Wait until the scheduled time using an adaptive smart delay loop.
-         2. When the time is reached, run the sign process.
-         3. After processing, loop back to wait for the next day.
+         1. Calculate the initial next_run time.
+         2. Wait until next_run using an adaptive smart delay loop.
+         3. When the time is reached, run the sign process.
+         4. After processing, calculate the next_run for the following day and loop.
         """
+        now = datetime.now()
+        target_time_obj = datetime.strptime(self.scheduled_time, "%H:%M:%S").time()
+
+        # Initial calculation for current_next_run
+        current_next_run = datetime.combine(now.date(), target_time_obj)
+        if current_next_run < now:
+            current_next_run += timedelta(days=1)
+        
+        print(f"[Service] Initializing. First run scheduled at: {current_next_run}")
+
         while True:
-            now = datetime.now()
-            # Parse scheduled time (hh:mm:ss)
-            target_time = datetime.strptime(self.scheduled_time, "%H:%M:%S").time()
-            next_run = datetime.combine(now.date(), target_time)
-            if next_run < now:
-                next_run += timedelta(days=1)
-            delay = (next_run - now).total_seconds()
-            print(f"[Service] Current time: {now}. Next run at: {next_run}. Total delay: {delay:.0f} seconds.")
+            now = datetime.now() 
+            delay = (current_next_run - now).total_seconds()
 
-            while delay > 0:
-                # Check every minute (60 seconds)
-                sleep_interval = min(60, delay)
-                await asyncio.sleep(sleep_interval)
-                now = datetime.now()
-                delay = (next_run - now).total_seconds()
-                print(f"[Service] Checking... Remaining delay: {delay:.2f} seconds.")
-
+            if delay > 0:
+                print(f"[Service] Current time: {now}. Next run at: {current_next_run}. Waiting for {delay:.0f} seconds.")
+                while delay > 0:
+                    sleep_interval = min(60, delay) 
+                    await asyncio.sleep(sleep_interval)
+                    now = datetime.now() 
+                    delay = (current_next_run - now).total_seconds() 
+                    if delay > 0: 
+                        print(f"[Service] Checking... {delay:.2f} seconds remaining until {current_next_run}.")
+            
+            print(f"[Service] Scheduled time {current_next_run} reached (current time: {datetime.now()}). Running sign process.")
             await self.run_sign_process()
+            process_completion_time = datetime.now()
+            print(f"[Service] Sign process completed at {process_completion_time}.")
+
+            current_next_run = datetime.combine(current_next_run.date() + timedelta(days=1), target_time_obj)
+            print(f"[Service] Next run scheduled for: {current_next_run}.")
+            
+            await asyncio.sleep(1)
 
     async def run_sign_process(self):
         """
